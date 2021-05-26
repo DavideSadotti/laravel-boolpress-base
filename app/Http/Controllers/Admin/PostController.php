@@ -3,11 +3,19 @@
 namespace App\Http\Controllers\Admin;
 use App\Post;
 use App\Http\Controllers\Controller;
+use App\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
+
+    protected $validation = [
+        'date' => 'required|date',
+        'content' => 'required|string',
+        'image' => 'nullable|url'
+    ];
+
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +24,8 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::all();
-        dd($posts);
+
+        return view('admin.posts.index', compact('posts'));
     }
 
     /**
@@ -26,7 +35,9 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('admin.posts.create');
+        $tags = Tag::all();
+        
+        return view('admin.posts.create', compact('tags'));
     }
 
     /**
@@ -38,34 +49,24 @@ class PostController extends Controller
     public function store(Request $request)
     {
         
+        $validation = $this->validation;
+        $validation['title'] = 'required|string|max:255|unique:posts';
+        
         // VALIDATION
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'date' => 'required|date',
-            'content' => 'required|string',
-            'image' => 'nullable|url',
-            ]);
-            
+        $request->validate($this->validation);
+
         $data = $request->all();
-
-        if( !isset($data['published'])){
-            $data['published'] = false;
-        }else{
-            $data['published'] = true;
-        }
-
+        
+        // CONTROLLO CHECKBOX
+        $data['published'] = !isset($data['published']) ? 0 : 1;
+        // IMPOSTO LO SLUG PARTENDO DAL TITLE
         $data['slug'] = Str::slug($data['title'], '-');
-        // INSERT
-        // $newPost = new Post();
-        // $newPost->title = $data['title'];
-        // $newPost->date = $data['date'];
-        // $newPost->content = $data['content'];
-        // $newPost->image = $data['image'];
-        // $newPost->slug = Str::slug($data['title'], '-');
-        // $newPost->published = $data['published'];
-        // $newPost->save();
 
-        Post::create($data);
+        // INSERT
+        $newPost = Post::create($data);    
+        
+        // AGGIUNGO I TAGS
+        $newPost->tags()->attach($data['tags']);
 
         // REDIRECT
         return redirect()->route('admin.posts.index');
@@ -79,7 +80,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        dd($post->comments);
+        return view('admin.posts.show', compact('post'));
     }
 
     /**
@@ -88,9 +89,11 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post)
     {
-        //
+        $tags = Tag::all();
+
+        return view('admin.posts.edit', compact('post', 'tags'));
     }
 
     /**
@@ -100,9 +103,29 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Post $post)
     {
-        //
+        $validation = $this->validation;
+        $validation['title'] = 'required|string|max:255|unique:posts,title,' . $post->id;
+
+        // VALIDATION
+        $request->validate($validation);
+
+        $data = $request->all();
+        
+        // CONTROLLO CHECKBOX
+        $data['published'] = !isset($data['published']) ? 0 : 1;
+        // IMPOSTO LO SLUG PARTENDO DAL TITLE
+        $data['slug'] = Str::slug($data['title'], '-');
+
+        // UPDATE
+        $post->update($data);
+
+        // AGGIORNO I TAGS
+        $post->tags()->sync($data['tags']);
+
+        // RETURN
+        return redirect()->route('admin.posts.show', $post);
     }
 
     /**
@@ -111,8 +134,12 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        //
+        $post->tags()->detach();
+
+        $post->delete();
+
+        return redirect()->route('admin.posts.index')->with('message', 'Il post è stato eliminato!');
     }
 }
