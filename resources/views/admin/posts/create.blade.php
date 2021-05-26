@@ -35,12 +35,23 @@
 			<label for="image">Image</label>
 			<input type="text" class="form-control" id="image" name="image" placeholder="Image" value="{{ old('image') }}">
 		</div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" id="published" name="published">
-            <label class="form-check-label" for="published">Pubblica</label>
-        </div>
-        <div>
-            <button type="submit" class="btn btn-primary">Crea</button>
+		<div class="mt-3">
+			<h3>Tags</h3>
+			@foreach ($tags as $tag)
+				<div class="form-check">
+					<input class="form-check-input" type="checkbox" value="{{$tag->id}}" id="{{$tag->name}}" name="tags[]">
+					<label class="form-check-label" for="{{$tag->name}}">
+						{{$tag->name}}
+					</label>
+				</div>
+			@endforeach
+		</div>
+        <div class="mt-5 form-check form-check-inline d-flex justify-content-between">
+			<div>
+				<input class="form-check-input" type="checkbox" id="published" name="published">
+				<label class="form-check-label" for="published">Spunta per pubblicare</label>
+			</div>
+			<button type="submit" class="btn btn-primary">Crea</button>
         </div>
 	</form>
 @endsection

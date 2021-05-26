@@ -1,15 +1,20 @@
-@extends('layouts.guest')
+@extends('layouts.base')
 
 @section('pageTitle')
 	{{$post->title}}
 @endsection
 
 @section('content')
-<div class="mt-3">
-	<h1>{{$post->title}}</h1>
-	<h4>{{$post->date}}</h4>
+	<p><strong>data:</strong> {{$post->date}}</p>
+	<p><strong>stato:</strong> {{$post->published ? 'pubblicato' : 'non pubblicato'}}</p>
+	<div><strong>tags: </strong>
+		@foreach ($post->tags as $tag)
+			<span class="badge badge-primary">{{$tag->name}}</span>
+		@endforeach
+	</div>
+	<hr>
 	<p>{{$post->content}}</p>
-
+	
 	@if ($post->comments->isNotEmpty())
 	<div class="mt-5">
 		<h3>Commenti</h3>
@@ -23,5 +28,5 @@
 		</ul>
 	</div>
 	@endif
-</div>
+	<a href="{{route('admin.posts.index')}}">Torna alla lista degli articoli</a>
 @endsection
