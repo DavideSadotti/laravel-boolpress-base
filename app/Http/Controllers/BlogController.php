@@ -8,7 +8,11 @@ class BlogController extends Controller
 {
     public function index(){
 
-        return view('guest.index');
+        // PRENDO I DATI DAL DB
+        $posts = Post::where('published', 1)->orderBy('date', 'asc')->get();
+
+        // RESTITUISCO LA PAGINA HOME
+        return view('guest.index', compact('posts'));
 
     }
 
@@ -23,6 +27,7 @@ class BlogController extends Controller
 
         // RESTITUISCO LA PAGINA DEL POST
         return view('guest.show', compact('post'));
+
     }
 
 }
