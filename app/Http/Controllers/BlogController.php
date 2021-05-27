@@ -47,21 +47,20 @@ class BlogController extends Controller
         return view('guest.index', compact('posts', 'tags'));
     }
 
-    public function addComment(Request $request){
+    public function addComment(Request $request, Post $post){
 
-        dd($request->all());
-        // $request->validate([
-        //     'name' => 'nullable|string|max:100',
-        //     'content' => 'required|string'
-        // ]);
+        $request->validate([
+            'name' => 'nullable|string|max:100',
+            'content' => 'required|string'
+        ]);
 
-        // $newComment = new Comment();
-        // $newComment->name = $request->name;
-        // $newComment->content = $request->content;
-        // $newComment->post_id = $post->id;
-        // $newComment->save();
+        $newComment = new Comment();
+        $newComment->name = $request->name;
+        $newComment->content = $request->content;
+        $newComment->post_id = $post->id;
+        $newComment->save();
 
-        // return back();
+        return back();
     }
 
 }

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'BlogController@index')->name('guest.posts.index');
 Route::get('posts/{slug}', 'BlogController@show')->name('guest.posts.show');
-Route::get('posts/{post}/add-comment', 'BlogController@addComment')->name('guest.posts.add-comment');
+Route::post('posts/{post}/add-comment', 'BlogController@addComment')->name('guest.posts.add-comment');
 Route::get('tags/{slug}', 'BlogController@filterTag')->name('guest.posts.filter-tag');
 
 Route::prefix('admin')->name('admin.')->namespace('Admin')->group(function () {
